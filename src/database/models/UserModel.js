@@ -7,7 +7,8 @@ export default {
 
     const [id] = await connection('users').insert(
       {
-        name: user.name,
+        firstname: user.firstname,
+        lastname: user.lastname,
         email: user.email,
         birthday: user.birthday,
         city: user.city,
@@ -38,9 +39,7 @@ export default {
       updated_at: new Date(),
     };
 
-    const [id] = await connection('users')
-      .where('id', id)
-      .update(userToUpdate, 'id');
+    await connection('users').where('id', id).update(userToUpdate, 'id');
 
     return id;
   },
@@ -51,7 +50,15 @@ export default {
     const users = await connection('users')
       .limit(include)
       .offset((page - 1) * include)
-      .select(['id', 'name', 'birthday', 'city', 'uf', 'country']);
+      .select([
+        'id',
+        'firstname',
+        'lastname',
+        'birthday',
+        'city',
+        'uf',
+        'country',
+      ]);
 
     return { users, count };
   },

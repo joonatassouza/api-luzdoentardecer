@@ -11,10 +11,11 @@ export const signUp = celebrate({
   [Segments.BODY]: Joi.object().keys({
     password: Joi.string().required().min(8),
     email: Joi.string().required().email(),
-    name: Joi.string().required(),
+    firstname: Joi.string().required(),
+    lastname: Joi.string().required(),
     birthday: Joi.date().required(),
     city: Joi.string().required(),
-    uf: Joi.string().required(),
+    uf: Joi.string().required().min(2).max(2),
     country: Joi.string().required(),
     street: Joi.string().allow('').optional(),
     neighborhood: Joi.string().allow('').optional(),
@@ -27,19 +28,20 @@ export const signUp = celebrate({
 
 export const update = celebrate({
   [Segments.BODY]: Joi.object().keys({
-    password: Joi.string().min(8),
-    email: Joi.string().email(),
-    name: Joi.string(),
-    birthday: Joi.date(),
-    city: Joi.string(),
-    uf: Joi.string(),
-    country: Joi.string(),
-    street: Joi.string(),
-    neighborhood: Joi.string(),
-    number: Joi.number(),
-    reference: Joi.string(),
-    zipcode: Joi.string(),
-    complement: Joi.string(),
+    password: Joi.string().min(8).optional(),
+    email: Joi.string().email().optional(),
+    firstname: Joi.string().allow('').optional(),
+    lastname: Joi.string().allow('').optional(),
+    birthday: Joi.date().allow('').optional(),
+    city: Joi.string().allow('').optional(),
+    uf: Joi.string().min(2).max(2),
+    country: Joi.string().allow('').optional(),
+    street: Joi.string().allow('').optional(),
+    neighborhood: Joi.string().allow('').optional(),
+    number: Joi.number().optional(),
+    reference: Joi.string().allow('').optional(),
+    zipcode: Joi.string().allow('').optional(),
+    complement: Joi.string().allow('').optional(),
   }),
   [Segments.PARAMS]: Joi.object().keys({
     id: Joi.number().required(),
@@ -55,5 +57,12 @@ export const del = celebrate({
 export const get = celebrate({
   [Segments.PARAMS]: Joi.object().keys({
     id: Joi.number().required(),
+  }),
+});
+
+export const index = celebrate({
+  [Segments.QUERY]: Joi.object().keys({
+    page: Joi.number().positive().min(1),
+    include: Joi.number().positive().min(5),
   }),
 });

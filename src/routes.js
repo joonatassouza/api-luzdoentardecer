@@ -13,7 +13,7 @@ routes.post('/api/v1/sessions', UserValidators.login, SessionController.store);
 routes.use(authMiddleware);
 
 // Authenticated routes
-routes.get('/api/v1/users', UserController.index);
+routes.get('/api/v1/users', UserValidators.index, UserController.index);
 routes.get('/api/v1/users/:id', UserValidators.get, UserController.get);
 routes.put('/api/v1/users/:id', UserValidators.update, UserController.update);
 routes.delete('/api/v1/users/:id', UserValidators.del, UserController.delete);
