@@ -2,6 +2,7 @@ import api from '../services/wordpressApi';
 
 import CategoryModel from '../database/models/CategoryModel';
 import { objectSize } from '../utils/ObjectUtils';
+import * as StringUtils from '../utils/StringUtils';
 
 class CategoryController {
   async store(request, response) {
@@ -20,7 +21,6 @@ class CategoryController {
     }
 
     const id = await CategoryModel.create({
-      wordpress_id: request.body.wordpress_id,
       name: request.body.name,
       description: request.body.description,
       tag: request.body.tag,
@@ -49,8 +49,6 @@ class CategoryController {
 
     const category = {};
 
-    if (request.body.wordpress_id)
-      category.wordpress_id = request.body.wordpress_id;
     if (request.body.name) category.name = request.body.name;
     if (request.body.description)
       category.description = request.body.description;
@@ -145,6 +143,96 @@ class CategoryController {
     }));
 
     return response.json({ count: data.length, data });
+  }
+
+  async importPosts(request, response) {
+    function getContentInfo(post) {
+      let wordpress_content = '';
+      let wordpress_description = '';
+      let content = '';
+      let description = '';
+      let type = 'post';
+
+      if (post.excerpt && post.excerpt.rendered) {
+        wordpress_description = post.excerpt.rendered;
+        description = StringUtils.clearString(post.excerpt.rendered);
+      }
+
+      if (post.content && post.content.rendered) {
+        wordpress_content = post.content.rendered;
+        let text = StringUtils.clearString(post.content.rendered);
+
+        if (post.content.rendered.indexOf('www.youtube.com/embed') > -1) {
+          text = StringUtils.extractUrlYoutubeEmbed(post.content.rendered);
+
+          if (text) {
+            type = 'youtube';
+          }
+        }
+
+        if (text) {
+          content = text;
+        }
+      }
+
+      const title = StringUtils.clearString(post.title && post.title.rendered);
+
+      const category_id =
+        Array.isArray(post.categories) && post.categories.length > 0
+          ? post.categories[0]
+          : post.categories;
+
+      const author =
+        post._embedded &&
+        post._embedded.author &&
+        post._embedded.author[0] &&
+        post._embedded.author[0].name;
+
+      return {
+        title,
+        content,
+        type,
+        category_id,
+        author,
+        description,
+        wordpress_content,
+        wordpress_description,
+      };
+    }
+
+    let posts = [];
+    let lastPostsLength = 0;
+    let page = 1;
+
+    do {
+      let { data } = await api.get(
+        `/posts?categories=${request.params.categoryId}&_embed=1&per_page=100&page=${page}`
+      );
+
+      data = data.map((post) => {
+        const contentInfo = getContentInfo(post);
+
+        return {
+          wordpress_id: post.id,
+          publish_date: post.date_gmt,
+          title: contentInfo.title,
+          content: contentInfo.content,
+          type: contentInfo.type,
+          author: contentInfo.author,
+          category_id: contentInfo.category_id,
+          user_id: request.userId,
+          description: contentInfo.description,
+          wordpress_content: contentInfo.wordpress_content,
+          wordpress_description: contentInfo.wordpress_description,
+        };
+      });
+
+      posts = posts.concat(data);
+      lastPostsLength = data.length;
+      page++;
+    } while (lastPostsLength === 100);
+
+    return response.json({ count: posts.length, data: posts });
   }
 }
 
