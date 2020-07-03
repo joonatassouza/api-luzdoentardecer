@@ -1,10 +1,28 @@
-import api from '../services/wordpressApi';
-
 import PostModel from '../database/models/PostModel';
 import { objectSize } from '../utils/ObjectUtils';
 
 class PostController {
   async store(request, response) {
+    let data = {};
+
+    switch (request.body.type) {
+      case 'youtube':
+        data = {
+          title: request.body.title,
+          description: request.body.description,
+          author: request.body.author,
+          publish_date: request.body.publish_date,
+          place: request.body.place,
+          template: request.body.template,
+          type: request.body.type,
+
+          category_id: request.body.category_id,
+          user_id: request.body.user_id,
+        };
+
+        break;
+    }
+
     const id = await PostModel.create({
       publish_date: request.body.publish_date,
       title: request.body.title,

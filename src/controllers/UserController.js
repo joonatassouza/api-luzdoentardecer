@@ -9,7 +9,7 @@ class UserController {
       return response.status(400).json({
         statusCode: 400,
         error: 'User already exists',
-        message: '"email" não disponível',
+        message: '"email" Não disponível',
         validation: {
           source: 'body',
           keys: ['email'],
@@ -22,6 +22,7 @@ class UserController {
       firstname: request.body.firstname,
       lastname: request.body.lastname,
       email: request.body.email,
+      whatsapp: request.body.whatsapp,
       birthday: request.body.birthday,
       city: request.body.city,
       uf: request.body.uf,
@@ -32,6 +33,7 @@ class UserController {
       reference: request.body.reference,
       zipcode: request.body.zipcode,
       complement: request.body.complement,
+      role: request.body.role,
     });
 
     return response.json({ id });
@@ -56,19 +58,40 @@ class UserController {
 
     const user = {};
 
-    if (request.body.firstname) user.firstname = request.body.firstname;
-    if (request.body.lastname) user.lastname = request.body.lastname;
-    if (request.body.birthday) user.birthday = request.body.birthday;
-    if (request.body.city) user.city = request.body.city;
-    if (request.body.uf) user.uf = request.body.uf;
-    if (request.body.country) user.country = request.body.country;
-    if (request.body.street) user.street = request.body.street;
-    if (request.body.neighborhood)
+    if (request.body.firstname && request.body.firstname !== userDb.firstname)
+      user.firstname = request.body.firstname;
+    if (request.body.lastname && request.body.lastname !== userDb.lastname)
+      user.lastname = request.body.lastname;
+    if (request.body.birthday && request.body.birthday !== userDb.birthday)
+      user.birthday = request.body.birthday;
+    if (request.body.city && request.body.city !== userDb.city)
+      user.city = request.body.city;
+    if (request.body.whatsapp && request.body.whatsapp !== userDb.whatsapp)
+      user.whatsapp = request.body.whatsapp;
+    if (request.body.uf && request.body.uf !== userDb.uf)
+      user.uf = request.body.uf;
+    if (request.body.country && request.body.country !== userDb.country)
+      user.country = request.body.country;
+    if (request.body.street && request.body.street !== userDb.street)
+      user.street = request.body.street;
+    if (
+      request.body.neighborhood &&
+      request.body.neighborhood !== userDb.neighborhood
+    )
       user.neighborhood = request.body.neighborhood;
-    if (request.body.number) user.number = request.body.number;
-    if (request.body.reference) user.reference = request.body.reference;
-    if (request.body.zipcode) user.zipcode = request.body.zipcode;
-    if (request.body.complement) user.complement = request.body.complement;
+    if (request.body.number && request.body.number !== userDb.number)
+      user.number = request.body.number;
+    if (request.body.reference && request.body.reference !== userDb.reference)
+      user.reference = request.body.reference;
+    if (request.body.zipcode && request.body.zipcode !== userDb.zipcode)
+      user.zipcode = request.body.zipcode;
+    if (
+      request.body.complement &&
+      request.body.complement !== userDb.complement
+    )
+      user.complement = request.body.complement;
+    if (request.body.role && request.body.role !== userDb.role)
+      user.role = request.body.role;
 
     if (objectSize(user) === 0) {
       return response.status(304).json({

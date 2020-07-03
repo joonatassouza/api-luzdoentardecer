@@ -11,6 +11,7 @@ export const signUp = celebrate({
   [Segments.BODY]: Joi.object().keys({
     password: Joi.string().required().min(8),
     email: Joi.string().required().email(),
+    whatsapp: Joi.string().required(),
     firstname: Joi.string().required(),
     lastname: Joi.string().required(),
     birthday: Joi.date().required(),
@@ -30,6 +31,7 @@ export const update = celebrate({
   [Segments.BODY]: Joi.object().keys({
     password: Joi.string().min(8).optional(),
     email: Joi.string().email().optional(),
+    whatsapp: Joi.string().allow('').optional(),
     firstname: Joi.string().allow('').optional(),
     lastname: Joi.string().allow('').optional(),
     birthday: Joi.date().allow('').optional(),

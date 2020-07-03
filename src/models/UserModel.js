@@ -5,25 +5,9 @@ export default {
   async create(user) {
     user.password_hash = await bcrypt.hash(user.password, 8);
 
-    const [id] = await connection('users').insert(
-      {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        birthday: user.birthday,
-        city: user.city,
-        uf: user.uf,
-        country: user.country,
-        street: user.street,
-        neighborhood: user.neighborhood,
-        number: user.number,
-        reference: user.reference,
-        zipcode: user.zipcode,
-        complement: user.complement,
-        password_hash: user.password_hash,
-      },
-      'id'
-    );
+    delete user.password;
+
+    const [id] = await connection('users').insert(user, 'id');
 
     return id;
   },
@@ -58,6 +42,7 @@ export default {
         'city',
         'uf',
         'country',
+        'whatasapp',
       ]);
 
     return { users, count };

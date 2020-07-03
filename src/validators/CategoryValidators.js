@@ -5,6 +5,8 @@ export const create = celebrate({
     name: Joi.string().required().min(3),
     description: Joi.string().required().min(10),
     tag: Joi.string().required().min(3),
+    featured: Joi.boolean().optional(),
+    order: Joi.number().required().min(1),
     parent_id: Joi.number().optional().min(1),
   }),
 });
@@ -17,6 +19,8 @@ export const update = celebrate({
     name: Joi.string().optional().min(3),
     description: Joi.string().optional().min(10),
     tag: Joi.string().optional().min(3),
+    featured: Joi.boolean().optional(),
+    order: Joi.number().optional().min(1),
     parent_id: Joi.number().optional().min(1),
   }),
 });

@@ -24,6 +24,8 @@ class CategoryController {
       name: request.body.name,
       description: request.body.description,
       tag: request.body.tag,
+      featured: request.body.featured,
+      order: request.body.order,
       parent_id: request.body.parent_id,
     });
 
@@ -49,11 +51,24 @@ class CategoryController {
 
     const category = {};
 
-    if (request.body.name) category.name = request.body.name;
-    if (request.body.description)
+    if (request.body.name && request.body.name !== categoryDb.name)
+      category.name = request.body.name;
+    if (
+      request.body.description &&
+      request.body.description !== categoryDb.description
+    )
       category.description = request.body.description;
-    if (request.body.tag) category.tag = request.body.tag;
-    if (request.body.parent_id) category.parent_id = request.body.parent_id;
+    if (request.body.tag && request.body.tag !== categoryDb.tag)
+      category.tag = request.body.tag;
+    if (request.body.featured && request.body.featured !== categoryDb.featured)
+      category.featured = request.body.featured;
+    if (request.body.order && request.body.order !== categoryDb.order)
+      category.order = request.body.order;
+    if (
+      request.body.parent_id &&
+      request.body.parent_id !== categoryDb.parent_id
+    )
+      category.parent_id = request.body.parent_id;
 
     if (objectSize(category) === 0) {
       return response.status(304).json({
@@ -203,36 +218,43 @@ class CategoryController {
     let posts = [];
     let lastPostsLength = 0;
     let page = 1;
+    let erro = false;
 
     do {
-      let { data } = await api.get(
-        `/posts?categories=${request.params.categoryId}&_embed=1&per_page=100&page=${page}`
-      );
+      let response = null;
 
-      data = data.map((post) => {
-        const contentInfo = getContentInfo(post);
+      try {
+        response = await api.get(`/posts?per_page=100&page=${page}`);
+      } catch (e) {
+        erro = true;
+      }
 
-        return {
-          wordpress_id: post.id,
-          publish_date: post.date_gmt,
-          title: contentInfo.title,
-          content: contentInfo.content,
-          type: contentInfo.type,
-          author: contentInfo.author,
-          category_id: contentInfo.category_id,
-          user_id: request.userId,
-          description: contentInfo.description,
-          wordpress_content: contentInfo.wordpress_content,
-          wordpress_description: contentInfo.wordpress_description,
-        };
-      });
+      if (response && Array.isArray(response.data)) {
+        let data = response.data.map((post) => {
+          const contentInfo = getContentInfo(post);
 
-      posts = posts.concat(data);
-      lastPostsLength = data.length;
-      page++;
-    } while (lastPostsLength === 100);
+          return {
+            wordpress_id: post.id,
+            publish_date: post.date_gmt,
+            title: contentInfo.title,
+            content: contentInfo.content,
+            type: contentInfo.type,
+            author: contentInfo.author,
+            category_id: contentInfo.category_id,
+            user_id: request.userId,
+            description: contentInfo.description,
+            wordpress_content: contentInfo.wordpress_content,
+            wordpress_description: contentInfo.wordpress_description,
+          };
+        });
 
-    return response.json({ count: posts.length, data: posts });
+        posts = posts.concat(data);
+        lastPostsLength = data.length;
+        page++;
+      }
+    } while (lastPostsLength === 100 || !erro);
+
+    return response.json({ count: posts.length, erro, data: posts });
   }
 }
 
